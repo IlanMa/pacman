@@ -1,0 +1,528 @@
+<html>
+<head>
+	<title>Pac Man</title>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<style type="text/css">
+		#container {
+			border: 2px solid black;
+			width: 560px;
+		}
+		.wall {
+			width:20px;
+			height:20px;
+			background-color: black;
+			display: inline-block;
+			border-radius
+		}
+		.dot {
+			width: 18px;
+			height: 18px;
+			background-color: blue;
+			border: gray 1px solid;
+			display: inline-block;
+		}
+		#pacman {
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			top: 110px;
+			left: 130px;
+		}
+		.coin {
+			width: 20px;
+			height: 20px;
+			background-color: black;
+			display: inline-block;
+			color: white;
+			padding:0px;
+			margin:0px;
+		}
+		#score {
+			width: 100px;
+			height: 50px;
+			position: absolute;
+			text-align: center;
+			font-size: 44px;
+			border: 1px solid black;
+			left: 600px;
+			top: 20px;
+		}
+		#ghostO{
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			top: 230px;
+			left: 250px;
+		}
+		#ghostC{
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			top: 305px;
+			left: 310px;
+		}
+		#ghostR{
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			top: 275px;
+			left: 310px;
+		}
+		#ghostP{
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			top: 305px;
+			left: 250px;
+		}
+	
+
+
+	</style>
+</head>
+<body>
+	<div id="container">
+		<div id="pacmans">	
+			<div id="pacman"><img src="Pacman.gif" width="100%" height="100%"></div>
+		</div>
+		<div id="ghostO"><img id="orange" src="ghostO.gif" width="100%" height="100%"></div>
+		<div id="ghostC"><img id="cyan" src="ghostC.gif" width="100%" height="100%"></div>
+		<div id="ghostR"><img id="red" src="ghostR.gif" width="100%" height="100%"></div>
+		<div id="ghostP"><img id="pink" src="ghostP.gif" width="100%" height="100%"></div>
+	</div>
+	<div id="score">0</div>
+
+
+
+<script type="text/javascript">
+var pacman = {
+	x: 130,
+	y: 110
+}
+var ghostO = {
+	x: 250,
+	y: 230,
+	l: 320,
+	n: 'ghostO',
+	direction: "",
+	random: false,
+	index: 1,
+	j: 0
+}
+var ghostC = {
+	x: 250,
+	y: 230,
+	l: 320,
+	n: 'ghostC',
+	direction: "",
+	random: false,
+	index: 1,
+	j: 0
+}
+var ghostP = {
+	x: 250,
+	y: 230,
+	l: 320,
+	n: 'ghostP',
+	direction: "",
+	random: false,
+	index: 1,
+	j: 0
+}
+var ghostR = {
+	x: 250,
+	y: 230,
+	l: 320,
+	n: 'ghostR',
+	direction: "",
+	random: false,
+	index: 1,
+	j: 0
+}
+var score = 0;
+var pml = 146;
+var test = "";
+var gameArea = [
+'O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O',
+'O','C','C','C','C','C','C','C','C','C','C','C','C','O','O','C','C','C','C','C','C','C','C','C','C','C','C','O',
+'O','C','O','O','O','O','C','O','O','O','O','O','C','O','O','C','O','O','O','O','O','C','O','O','O','O','C','O',
+'O','B','O','O','O','O','C','O','O','O','O','O','C','O','O','C','O','O','O','O','O','C','O','O','O','O','B','O',
+'O','C','O','O','O','O','C','O','O','O','O','O','C','O','O','C','O','O','O','O','O','C','O','O','O','O','C','O',
+'O','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','O',
+'O','C','O','O','O','O','C','O','O','C','O','O','O','O','O','O','O','O','C','O','O','C','O','O','O','O','C','O',
+'O','C','O','O','O','O','C','O','O','C','O','O','O','O','O','O','O','O','C','O','O','C','O','O','O','O','C','O',
+'O','C','C','C','C','C','C','O','O','C','C','C','C','O','O','C','C','C','C','O','O','C','C','C','C','C','C','O',
+'O','O','O','O','O','O','C','O','O','O','O','O','X','O','O','X','O','O','O','O','O','C','O','O','O','O','O','O',
+'X','X','X','X','X','O','C','O','O','O','O','O','X','O','O','X','O','O','O','O','O','C','O','X','X','X','X','X',
+'X','X','X','X','X','O','C','O','O','X','X','X','X','X','X','X','X','X','X','O','O','C','O','X','X','X','X','X',
+'X','X','X','X','X','O','C','O','O','X','O','O','O','O','O','O','O','O','X','O','O','C','O','X','X','X','X','X',
+'O','O','O','O','O','O','C','O','O','X','O','X','X','X','X','X','X','O','X','O','O','C','O','O','O','O','O','O',
+'X','X','X','X','X','X','C','X','X','X','O','X','X','X','X','X','X','O','X','X','X','C','X','X','X','X','X','X',
+'O','O','O','O','O','O','C','O','O','X','O','X','X','X','X','X','X','O','X','O','O','C','O','O','O','O','O','O',
+'X','X','X','X','X','O','C','O','O','X','O','O','O','O','O','O','O','O','X','O','O','C','O','X','X','X','X','X',
+'X','X','X','X','X','O','C','O','O','X','X','X','X','X','X','X','X','X','X','O','O','C','O','X','X','X','X','X',
+'X','X','X','X','X','O','C','O','O','X','O','O','O','O','O','O','O','O','X','O','O','C','O','X','X','X','X','X',
+'O','O','O','O','O','O','C','O','O','X','O','O','O','O','O','O','O','O','X','O','O','C','O','O','O','O','O','O',
+'O','C','C','C','C','C','C','C','C','C','C','C','C','O','O','C','C','C','C','C','C','C','C','C','C','C','C','O',
+'O','C','O','O','O','O','C','O','O','O','O','O','C','O','O','C','O','O','O','O','O','C','O','O','O','O','C','O',
+'O','C','O','O','O','O','C','O','O','O','O','O','C','O','O','C','O','O','O','O','O','C','O','O','O','O','C','O',
+'O','B','C','C','O','O','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','O','O','C','C','B','O',
+'O','O','O','C','O','O','C','O','O','C','O','O','O','O','O','O','O','O','C','O','O','C','O','O','C','O','O','O',
+'O','O','O','C','O','O','C','O','O','C','O','O','O','O','O','O','O','O','C','O','O','C','O','O','C','O','O','O',
+'O','C','C','C','C','C','C','O','O','C','C','C','C','O','O','C','C','C','C','O','O','C','C','C','C','C','C','O',
+'O','C','O','O','O','O','O','O','O','O','O','O','C','O','O','C','O','O','O','O','O','O','O','O','O','O','C','O',
+'O','C','O','O','O','O','O','O','O','O','O','O','C','O','O','C','O','O','O','O','O','O','O','O','O','O','C','O',
+'O','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','C','O',
+'O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O','O',
+];
+
+
+function updateScore(){
+	score += 10;
+	$('#score').html(score)
+}
+function drawMap(){
+	for (i=1; i<=gameArea.length; i++){
+		if (gameArea[i-1] == 'X'){
+			$('#container').append("<div class='wall' id="+i+"></div>")
+			if (i % 28 == 0){
+				$('#container').append("<br>")
+			}
+		}else if(gameArea[i-1] == 'O'){
+			$('#container').append("<div class='dot' id="+i+"></div>")
+			if (i % 28 == 0){
+				$('#container').append("<br>")
+			}
+		}else if(gameArea[i-1] == 'B'){
+			$('#container').append("<div class='coin' id="+i+"><img src='bullet4.png' width='100%' height='100%'></div>")
+			if (i % 28 == 0){
+				$('#container').append("<br>")
+			}
+		}else {
+			$('#container').append("<div class='coin' id="+i+"><img src='dotWORK.png' width='100%' height='100%'></div>")
+			if (i % 28 == 0){
+				$('#container').append("<br>")
+			}
+		}
+	}
+}
+	$(document).keyup(function (e){
+		move(e.keyCode)
+		})
+
+var time = ""
+var count = 0;
+var count2 = 0;
+var down = false;
+var up = false;
+var left = false;
+var right = false;
+
+function checkIntersection(ghost){
+	count = 0;
+	count2 = 0;
+	down = false;
+	up = false;
+	left = false;
+	right = false;
+	if(gameArea[ghost.l+28] != 'O'){
+		count += 1;
+		down = true;
+	}
+	if(gameArea[ghost.l-28] != 'O'){
+		count += 1;
+		up = true;
+	}
+	if(gameArea[ghost.l-1] != 'O'){
+		count2 += 1;
+		left = true;
+	}
+	if(gameArea[ghost.l+1] != 'O'){
+		count2 += 1;
+		right = true;
+	}
+	checkDistance(ghost)
+}
+var array = []
+var index = "";
+var value = "";
+var scared = false;
+var checkDistance = function(ghost){
+	array = []
+	if((count == 2 && count2 == 0) || (count == 0 && count2 == 2)) {
+	}else{
+		ghost.random = true;
+		var downV = 10000;
+		var upV = 10000;
+		var leftV = 10000;
+		var rightV = 10000;
+		if(scared == false){
+			if(down){
+				downV = Math.sqrt(Math.pow(pacman.y-(ghost.y+20),2)+Math.pow(pacman.x-ghost.x,2))
+			}
+			if(up){
+				upV = Math.sqrt(Math.pow(pacman.y-(ghost.y-20),2)+Math.pow(pacman.x-ghost.x,2))
+			}
+			if(left){
+				leftV = Math.sqrt(Math.pow(pacman.y-ghost.y,2)+Math.pow(pacman.x-(ghost.x-20),2))
+			}
+			if(right){
+				rightV = Math.sqrt(Math.pow(pacman.y-ghost.y,2)+Math.pow(pacman.x-(ghost.x+20),2))
+			}
+		}else{
+			if(down){
+				downV = Math.sqrt(Math.pow(pacman.y-(ghost.y-20),2)+Math.pow(pacman.x-ghost.x,2))
+			}
+			if(up){
+				upV = Math.sqrt(Math.pow(pacman.y-(ghost.y+20),2)+Math.pow(pacman.x-ghost.x,2))
+			}
+			if(left){
+				leftV = Math.sqrt(Math.pow(pacman.y-ghost.y,2)+Math.pow(pacman.x-(ghost.x+20),2))
+			}
+			if(right){
+				rightV = Math.sqrt(Math.pow(pacman.y-ghost.y,2)+Math.pow(pacman.x-(ghost.x-20),2))
+			}
+		}
+		array = [downV,upV,leftV,rightV]
+
+		ghost.index = 0;
+		value = array[0];
+		for (var i = 1; i < array.length; i++) {
+			if (array[i] < value) {
+			value = array[i];
+			ghost.index = i;
+			}
+		}
+	}
+	if (value > 200){
+		randomDirection(ghost);
+	}else{
+		ghostMove(ghost);
+	}
+}
+function randomDirection(ghost){
+	if (ghost.random){
+		var possibilities = [];
+		if (down && ghost.direction != "down")
+			possibilities.push(0)
+		if(up && ghost.direction != "up")
+			possibilities.push(1)
+		if(left && ghost.direction != "left" && ghost.l != 398)
+			possibilities.push(2)
+		if(right && ghost.direction != "right" && ghost.l != 415){
+			possibilities.push(3)
+		}
+		ghost.index = possibilities[Math.floor(Math.random()*possibilities.length)]
+		if (ghost.index == 0){
+			ghost.direction = "up";
+		}
+		else if (ghost.index == 1){
+			ghost.direction = "down";
+		}
+		else if (ghost.index == 2){
+			ghost.direction = "right";
+		}
+		else if (ghost.index == 3){
+			ghost.direction = "left";
+		}
+	}
+	ghost.random = false;	
+	ghostMove(ghost);
+}
+
+function ghostMove(ghost){
+	if (gameArea[ghost.l+28] != 'O' && ghost.index == 0){
+		ghost.l +=28;
+		ghost.y += 20;
+		$('#'+ghost.n).animate({
+			'top': ghost.y
+		},500,'linear')
+	}
+	else if(gameArea[ghost.l-28] != 'O' && ghost.index == 1){
+		ghost.l -= 28;
+		ghost.y -= 20;
+		$('#'+ghost.n).animate({
+			'top': ghost.y
+		},500,'linear')
+	}else if(gameArea[ghost.l-1] != 'O' && ghost.index == 2){
+		ghost.l -= 1;
+		ghost.x -= 20;
+		$('#'+ghost.n).animate({
+			'left': ghost.x
+		},500,'linear')
+	}
+	else if(gameArea[ghost.l+1] != 'O' && ghost.index == 3){
+		ghost.l += 1;
+		ghost.x += 20;
+		$('#'+ghost.n).animate({
+			'left': ghost.x
+		},500,'linear')
+	}
+	if (ghost == ghostO){
+		if (cyanghost){
+			ghost = ghostC
+			checkIntersection(ghost)
+		}else{
+			clearInterval(time)
+			time = setInterval(function(){checkIntersection(ghost)}, 500)
+		}
+	}
+	else if (ghost == ghostC){
+		if (pinkghost){
+			ghost = ghostP
+			checkIntersection(ghost)
+		}else{
+			clearInterval(time)
+			time = setInterval(function(){checkIntersection(ghost)}, 500)
+			ghost = ghostO
+		}
+	}
+	else if (ghost == ghostP){
+		if(redghost){
+			ghost = ghostR
+			checkIntersection(ghost)
+		}else{
+			clearInterval(time)
+			time = setInterval(function(){checkIntersection(ghost)}, 500)
+			ghost = ghostO
+		}
+	}
+	else if (ghost == ghostR){
+		ghost = ghostO
+		clearInterval(time)
+		time = setInterval(function(){checkIntersection(ghost)}, 500)
+	}
+}	
+
+checkIntersection(ghostO);
+var orangeghost = false;
+var cyanghost = false;
+var pinkghost = false;
+var redghost = false;
+setInterval(function(){orangeghost = true}, 400)
+// setInterval(function(){cyanghost = true}, 5000)
+// setInterval(function(){pinkghost = true}, 10000)
+// setInterval(function(){redghost = true}, 15000)
+
+
+function checkPosition(){
+	if (pml == 392){
+		pml = 418;
+		pacman.x = 554
+		$('#pacman').css('left', pacman.x)
+	}else if(pml ==419){
+		pml = 393;
+		pacman.x = 6
+		$('#pacman').css('left', pacman.x)
+	}
+}
+function replaceTile(val){
+	$('#'+(pml+val)).replaceWith("<div class='wall' id="+i+"></div>")
+	gameArea[pml] = 'X';
+	updateScore();
+}
+function spooky(val){
+	$('#orange').attr('src', 'spooky.gif')
+	$('#cyan').attr('src', 'spooky.gif')
+	$('#red').attr('src', 'spooky.gif')
+	$('#pink').attr('src', 'spooky.gif')
+	$('#'+(pml+val)).replaceWith("<div class='wall' id="+i+"></div>")
+	gameArea[pml] = 'X';	
+	scared = true;
+	checkdistance = "";
+	setTimeout(function(){
+		$('#orange').attr('src', 'ghostO.gif')
+		$('#cyan').attr('src', 'ghostC.gif')
+		$('#red').attr('src', 'ghostR.gif')
+		$('#pink').attr('src', 'ghostP.gif')
+		scared = false;
+	}, 10000)
+
+}
+function move(code){
+	if(code == '40'){ //down
+			if(gameArea[pml+28] != 'O'){
+				pml += 28
+				if(gameArea[pml] == 'C'){
+					replaceTile(1);
+				}
+				else if(gameArea[pml] == 'B'){
+					spooky(1);
+				}
+				clearInterval(test)
+				test = setInterval(function(){move(code)},200);
+				$('#pacman').css('transform', 'rotate(90deg)')
+				for(i=0;i<5;i++){
+					setTimeout(function(){
+						pacman.y += 4;
+						$('#pacman').css('top', pacman.y);
+					},i*50);
+				}
+			}
+		}
+		else if(code == '38'){ //up
+			if(gameArea[pml-28] != 'O'){
+				pml -= 28
+				if(gameArea[pml] == 'C'){
+					replaceTile(1)
+				}else if(gameArea[pml] == 'B'){
+					spooky(1);
+				}
+				clearInterval(test)
+				test = setInterval(function(){move(code)},200);
+				$('#pacman').css('transform', 'rotate(270deg)')
+				for(i=0;i<5;i++){
+					setTimeout(function(){
+						pacman.y -= 4
+						$('#pacman').css('top', pacman.y)
+					},i*50);
+				}
+			}
+		}
+		else if(code == '37'){ //left
+			if(gameArea[pml-1] != 'O'){
+				pml -= 1
+				if(gameArea[pml] == 'C'){
+					replaceTile(1)
+				}else if(gameArea[pml] == 'B'){
+					spooky(1);
+				}
+				clearInterval(test)
+				test = setInterval(function(){move(code)},200);
+				$('#pacman').css('transform', 'rotate(180deg)')
+				for(i=0;i<5;i++){
+					setTimeout(function(){
+						pacman.x -= 4
+						$('#pacman').css('left', pacman.x)
+					},i*50);
+				}
+			}
+		}
+		else if(code == '39'){ //right
+			if(gameArea[pml+1] != 'O'){
+				pml += 1
+				if(gameArea[pml] == 'C'){
+					replaceTile(1)
+			}
+				clearInterval(test)
+				test = setInterval(function(){move(code)},200);
+				$('#pacman').css('transform', 'rotate(0deg)')
+				for(i=0;i<5;i++){
+					setTimeout(function(){
+						pacman.x += 4
+						$('#pacman').css('left', pacman.x)
+					},i*50);
+				}
+				
+			}
+		}
+		checkPosition();
+	}
+drawMap();
+
+
+
+
+</script>
+</body>
+</html>
